@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/go13933serverless:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/go13933serverless:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: go13933serverless
+        chartPath: charts/go13933serverless
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jenkinsxworkshop/go13933serverless'
+          image.tag: '{{.DIGEST_HEX}}'
